@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: your-custom-image:tag
+      image: jekyll/jekyll:latest
     steps:
     - uses: actions/checkout@v2
     - name: Build the site
