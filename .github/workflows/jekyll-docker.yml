@@ -2,26 +2,32 @@ name: Jekyll site CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: jekyll/jekyll:latest
+
     steps:
     - uses: actions/checkout@v2
 
     - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: '2.7'
+
+    - name: Set write permissions for Gemfile.lock
       run: |
-        gem install bundler
+        sudo chmod 777 /__w/pidctest/pidctest/Gemfile.lock
+
+    - name: Install dependencies
+      run: |
         bundle install
 
-    - name: Fix permissions
-      run: |
-        sudo chown -R $(whoami) /__w/pidctest/pidctest
-
     - name: Build the site
-      run: jekyll build --future
+      run: |
+        bundle exec jekyll build
