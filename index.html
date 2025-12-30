@@ -10,6 +10,9 @@
         body{
             background: #eee;
         }
+
+        /* allow large text to overflow the SVG instead of being clipped */
+        svg { overflow: visible; }
         .axis path,
         .axis line{
             fill:none;
@@ -34,14 +37,6 @@
             pointer-events: none;
             display: none; /* Initially hidden */
         }
-        /* #showY {
-            "x":w-padding-400;
-            "y":h-padding;
-            text-align: left;
-            font: 200px sans-serif;
-            fill: black;
-            opacity: 2;
-        } */
     </style>
 </head>
 <body>
@@ -54,7 +49,7 @@
     
     <script>
         // 1. 定義width, height, padding, letterList變數
-        var w = 900;
+        var w = 1200;
         var h = 600;
         var padding =80;
         var letterList = ["A","B","C","D","E","F","G","H","I","J","K","M","N","O","P","Q","T","U","V","W","X","Z"];
@@ -88,6 +83,7 @@
     .append("svg")
     .attr("width",w)
      .attr("height",h)
+    .attr("overflow","visible")    // ensure SVG does not clip the big year text
      };
     
         
@@ -241,44 +237,44 @@
             });
         
     d3.select("#timer").on("click", () => {
+        console.log("timer click"); // debug: check this appears in DevTools console
         const dateArr = unique(dataSet.map(d => d.date.getFullYear()));
         let idx = 0;
-            
-           d3.select("svg")
-            .append("text")
-            .attr("id","showY")
-            .attr("x",w-padding-200)
-            .attr("y",h-padding)
-            .attr("fill","black")
-            .attr("fill-opacity","0.2")
-            .attr("font-size",200)
-            
+
+        d3.select("#showY").remove();
+        d3.select("svg")
+          .append("text")
+          .attr("id","showY")
+          .attr("x", w - padding - 140)          // toward right side
+          .attr("y", h / 2)                      // center vertically (baseline adjusted below)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "200px")             // use SVG attribute (more reliable)
+          .attr("fill", "black")
+          .attr("fill-opacity", 0.08)
+          .attr("pointer-events", "none")
+          .attr("dy", ".35em")                   // vertical centering tweak
+          .raise();                              // bring the text to front
+
         const interval = setInterval(() => {
             if (idx >= dateArr.length) {
-       clearInterval(interval);
-       return;
+                clearInterval(interval);
+                return;
             }
-        
+
             const selectedCategory = d3.select("select").property("value");
             const filteredData = dataSet.filter(d =>
-       d.category === selectedCategory && d.date.getFullYear() === dateArr[idx]
+                d.category === selectedCategory && d.date.getFullYear() === dateArr[idx]
             );
-        
-            console.log(`Year: ${dateArr[idx]}, Data:`, filteredData); // Debugging
-        
-            bind(filteredData);
+
             d3.select("#showY").text(dateArr[idx]);
-            // Reset the `isInitialRender` only for the first loop iteration
+
             if (idx === 0) isInitialRender = true;
-        
+            bind(filteredData);
             render(filteredData);
-            
-            
-        
+
             idx++;
-           
         }, 1000);
-            });
+    });
         }
         
             </script>
